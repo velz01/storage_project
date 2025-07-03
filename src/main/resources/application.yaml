@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5442/cloud_storage
+    username: db_user
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+  jpa:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: validate
+        show_sql: true
+
+
+
+minio:
+  bucket: user-files
+  url: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
