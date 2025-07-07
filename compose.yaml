@@ -13,7 +13,7 @@ services:
 #      SPRING_REDIS_HOST: redis
 #      SPRING_REDIS_PORT: 6379
 #    ports:
-#      - "8090:8090"
+#      - "8090:8090
 
   postgres:
     image: postgres:17.2
