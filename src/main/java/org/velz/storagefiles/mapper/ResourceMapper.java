@@ -29,12 +29,12 @@ public class ResourceMapper {
                 .build();
     }
 
-    public ResourceDto mapToResource(Item directoryInfo) {
+    public ResourceDto mapToResource(Item resourceInfo) {
        return ResourceDto.builder()
-                .path(PathUtils.getRelativePath(directoryInfo.objectName()))
-                .name(PathUtils.getFileNameOrDirectoryName(directoryInfo.objectName())) //передел!
-                .size(directoryInfo.size())
-                .type(directoryInfo.isDir() ? ResourceType.DIRECTORY : ResourceType.FILE)
+                .path(PathUtils.getRelativePath(resourceInfo.objectName()))
+                .name(PathUtils.getFileNameOrDirectoryName(resourceInfo.objectName()))
+                .size(resourceInfo.size())
+                .type(resourceInfo.isDir() ? ResourceType.DIRECTORY : ResourceType.FILE)
                 .build();
 
     }
@@ -44,6 +44,15 @@ public class ResourceMapper {
         return ResourceDto.builder()
                 .path(PathUtils.getRelativePath(objectWriteResponse.object()))
                 .name(PathUtils.getFileNameOrDirectoryName(objectWriteResponse.object()))
+                .size(null)
+                .type(ResourceType.DIRECTORY)
+                .build();
+    }
+
+    public ResourceDto mapToResource(String newPath) {
+        return ResourceDto.builder()
+                .path(PathUtils.getRelativePath(newPath))
+                .name(PathUtils.getFileNameOrDirectoryName(newPath))
                 .size(null)
                 .type(ResourceType.DIRECTORY)
                 .build();

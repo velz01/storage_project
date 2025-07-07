@@ -29,14 +29,8 @@ public class SecurityConfiguration {
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                                 .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/api/**").authenticated()
-                                .requestMatchers("/api/user/me").authenticated()
+                                .requestMatchers("/api/user/me").authenticated() //
                                 .requestMatchers("/**").permitAll()
-//                                .requestMatchers("/",
-//                                                "/api/auth/**",
-//                                                "/swagger-ui.html",
-//                                                "/swagger-ui/**",
-//                                                "/v3/api-docs/**",
-//                                                "/swagger-resources/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
@@ -53,7 +47,6 @@ public class SecurityConfiguration {
     }
     @Bean
     public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }

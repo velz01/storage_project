@@ -22,6 +22,7 @@ import org.velz.storagefiles.dto.UserCreateEditDto;
 import org.velz.storagefiles.dto.UserReadDto;
 import org.velz.storagefiles.entity.User;
 import org.velz.storagefiles.exception.UserNotAuthorizedException;
+import org.velz.storagefiles.service.MinioStorageService;
 import org.velz.storagefiles.service.UserService;
 
 @RestController
@@ -31,7 +32,7 @@ public class UserController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
-
+    private final MinioStorageService minioStorageService;
 
     @PostMapping("/auth/sign-up")
     @ResponseStatus(value = HttpStatus.CREATED)
@@ -43,7 +44,11 @@ public class UserController {
 //            throw new RuntimeException();
 //        }
         UserReadDto userReadDto = userService.create(dto);
+        User user = userService.loadUserByUsername(userReadDto.getUsername());
+
         authenticateUser(dto, session);
+
+        minioStorageService.createUserRootDirectory(user.getId());
 
         return userReadDto;
     }

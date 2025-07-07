@@ -1,9 +1,21 @@
 spring:
+
   datasource:
     url: jdbc:postgresql://localhost:5442/cloud_storage
     username: db_user
     password: password
     driver-class-name: org.postgresql.Driver
+
+
+
+
+  session:
+    store-type: redis
+
+  data:
+    redis:
+      host: redis
+      port: 6379
 
   servlet:
     multipart:
@@ -17,6 +29,7 @@ spring:
         hbm2ddl:
           auto: validate
         show_sql: true
+
 
 
 

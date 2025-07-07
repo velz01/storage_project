@@ -5,10 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.velz.storagefiles.exception.DirectoryNotExistsException;
-import org.velz.storagefiles.exception.FileAlreadyExistsException;
-import org.velz.storagefiles.exception.InvalidFileException;
-import org.velz.storagefiles.exception.StorageException;
+import org.velz.storagefiles.exception.*;
 
 import java.nio.file.InvalidPathException;
 import java.util.Map;
@@ -34,15 +31,21 @@ public class ResourceExceptionHandler {
         return Map.of("message", "невалидное тело запроса");
     }
 
-    @ExceptionHandler(FileAlreadyExistsException.class)
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleFileAlreadyExistsException() {
-        return Map.of("message", "файл уже существует");
+        return Map.of("message", "Ресурс уже существует");
     }
 
-    @ExceptionHandler(DirectoryNotExistsException.class)
+    @ExceptionHandler(ResourceNotExistsException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleDirectoryNotExistsException() {
-        return Map.of("message", "папка не существует");
+        return Map.of("message", "ресурса не существует");
+    }
+
+    @ExceptionHandler(ParentFolderNotExistsException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleParentFolderNotExistsException() {
+        return Map.of("message", "Родительская папка не существует");
     }
 }
