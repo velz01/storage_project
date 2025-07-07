@@ -1,20 +1,6 @@
 
 services:
 
-#  app:
-#    image: storage-files:latest
-#    container_name: app
-#    restart: always
-#    depends_on:
-#      - postgres
-#      - minio
-#      - redis
-#    environment:
-#      SPRING_REDIS_HOST: redis
-#      SPRING_REDIS_PORT: 6379
-#    ports:
-#      - "8090:8090
-
   postgres:
     image: postgres:17.2
     container_name: postgres

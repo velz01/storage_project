@@ -55,10 +55,10 @@ public class MinioRepository {
 
 
     public void renameFile(String oldPath, String newPath) {
-        if (!resourceExists(oldPath)) {
-            throw new ResourceNotExistsException("Ресурс не существует");
-        }
 
+        if (resourceExists(newPath)) {
+            throw new ResourceAlreadyExistsException("Ресурс уже существует");
+        }
         try {
             minioClient.copyObject(
                     CopyObjectArgs.builder()
@@ -78,14 +78,18 @@ public class MinioRepository {
     }
 
     public void renameDirectory(String oldPath, String newPath) {
-//    if (!resourceExists(oldPath)) {
-//        throw new ResourceNotExistsException("Ресурс не существует");
-//    }
+
+
         try {
-            for (Result<Item> resourceInfo : getDirectoryInfoRecursive(oldPath)) {
+            Iterable<Result<Item>> directoryInfoRecursive = getDirectoryInfoRecursive(oldPath);
+            for (Result<Item> resourceInfo : directoryInfoRecursive) {
 
                 String resourcePath = resourceInfo.get().objectName();
+
+
+
                 if (resourcePath.equals(oldPath)) {
+                    renameFile(resourcePath, newPath);
                     removeFile(oldPath);
                     continue;
                 }

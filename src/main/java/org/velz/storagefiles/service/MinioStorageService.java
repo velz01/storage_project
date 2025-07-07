@@ -27,8 +27,6 @@ public class MinioStorageService {
     private final ResourceMapper resourceMapper;
 
 
-
-
     public void createUserRootDirectory(Long id) {
         String userRootDirectory = PathUtils.getUserRootDirectory(id);
         minioRepository.createEmptyDirectory(userRootDirectory);
@@ -74,9 +72,17 @@ public class MinioStorageService {
     }
 
     public ResourceDto renameResource(String oldPath, String newPath, Long id) {
+        if (newPath.isBlank()) {
+            throw new InvalidPathException("Невалидный путь", "Путь пустой");
+        }
+
 
         String oldPathWithRootDirectory = resolvePath(oldPath, id);
         String newPathWithRootDirectory = resolvePath(newPath, id);
+
+        if (minioRepository.resourceExists(newPathWithRootDirectory)) {
+            throw new ResourceAlreadyExistsException("Ресурс уже существует");
+        }
 
         if (PathUtils.isDirectory(oldPath)) {
             minioRepository.renameDirectory(oldPathWithRootDirectory, newPathWithRootDirectory);
