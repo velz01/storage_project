@@ -8,12 +8,39 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 
 @UtilityClass
 public class PathUtils {
+    private static final Pattern PATH_PART_PATTERN = Pattern.compile("^(?! |.* $)[^/\\\\:*?\"<>|]+$");
 
-    public static final String SLASH = "/";
+    private static final String SLASH = "/";
+    private static final String SLASHES_TO_SPLIT = "[/\\\\]+";
+
+    public String resolvePath(String path, Long id) {
+
+        String pathWithUserRootDirectory = PathUtils.getPathWithUserRootDirectory(path, id);
+
+//        String pathWithoutSlashes = pathWithUserRootDirectory.trim().replaceAll(SLASHES_TO_DELETE, "");
+
+        String[] parts = pathWithUserRootDirectory.split(SLASHES_TO_SPLIT);
+
+
+        for (String part : parts) {
+            if (part.isBlank()) {
+                throw new InvalidPathException("Невалидный путь", "пустой сегмент пути");
+
+            }
+            if (!PATH_PART_PATTERN.matcher(part).matches()) {
+                throw new InvalidPathException("Невалидный путь", "недопустимый сегмент в пути");
+
+            }
+        }
+
+
+        return pathWithUserRootDirectory;
+    }
 
 
     public String getRelativePath(String resourceName) {
@@ -24,7 +51,7 @@ public class PathUtils {
         if (count <= 2) {
             return relativePath;
         } else {
-            for (int i = 1; i < count - 1 ; i++) {
+            for (int i = 1; i < count - 1; i++) {
                 relativePath = relativePath.concat(split[i] + "/");
             }
         }
@@ -66,9 +93,9 @@ public class PathUtils {
         String[] split = path.split("/");
         long count = Arrays.stream(split).count();
 
-            for (int i = 0; i < count - 1 ; i++) {
-                pathWithoutLastSegment = pathWithoutLastSegment.concat(split[i] + "/");
-            }
+        for (int i = 0; i < count - 1; i++) {
+            pathWithoutLastSegment = pathWithoutLastSegment.concat(split[i] + "/");
+        }
 
 
         return pathWithoutLastSegment;

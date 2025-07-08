@@ -77,8 +77,8 @@ public class MinioStorageService {
         }
 
 
-        String oldPathWithRootDirectory = resolvePath(oldPath, id);
-        String newPathWithRootDirectory = resolvePath(newPath, id);
+        String oldPathWithRootDirectory = PathUtils.resolvePath(oldPath, id);
+        String newPathWithRootDirectory = PathUtils.resolvePath(newPath, id);
 
         if (minioRepository.resourceExists(newPathWithRootDirectory)) {
             throw new ResourceAlreadyExistsException("Ресурс уже существует");
@@ -97,7 +97,7 @@ public class MinioStorageService {
     }
 
     public List<ResourceDto> getDirectoryInfo(String path, Long id) {
-        String pathWithRootDirectory = resolvePath(path, id);
+        String pathWithRootDirectory = PathUtils.resolvePath(path, id);
         List<ResourceDto> fileList = new ArrayList<>();
 
 
@@ -113,14 +113,14 @@ public class MinioStorageService {
                 fileList.add(resourceDto);
             }
         } catch (Exception e) {
-            throw new ResourceNotExistsException("Папка не существует"); // TODO: ??
+            throw new ResourceNotExistsException("Папка не существует");
         }
         return fileList;
     }
 
     public List<ResourceDto> upload(String path, List<MultipartFile> files, Long id) {
         List<ResourceDto> fileList = new ArrayList<>();
-        String pathWithRootDirectory = resolvePath(path, id);
+        String pathWithRootDirectory = PathUtils.resolvePath(path, id);
 
 
         for (MultipartFile file : files) {
@@ -148,8 +148,11 @@ public class MinioStorageService {
     }
 
 
-    public ResourceDto createEmptyDirectory(String path, Long id) { //TODO: сделать создание пустой папки в загруженную вручную
-        String pathWithRootDirectory = resolvePath(path, id);
+    public ResourceDto createEmptyDirectory(String path, Long id) {
+        if (!PathUtils.isDirectory(path)) {
+            throw new InvalidPathException("Невалидный путь", "Ресурс не является папкой");
+        }
+        String pathWithRootDirectory = PathUtils.resolvePath(path, id);
         String pathToParentDirectory = PathUtils.removeLastSegmentFromDirectory(pathWithRootDirectory);
 
         if (!minioRepository.resourceExists(pathToParentDirectory)) {
@@ -165,7 +168,7 @@ public class MinioStorageService {
 
     public ResourceDto getFileInfo(String path, Long id) {
 
-        String pathWithRootDirectory = resolvePath(path, id);
+        String pathWithRootDirectory = PathUtils.resolvePath(path, id);
         StatObjectResponse statObjectResponse = minioRepository.getFileInfo(pathWithRootDirectory);
 
         return resourceMapper.mapToResource(statObjectResponse);
@@ -179,7 +182,7 @@ public class MinioStorageService {
 
 
     public void deleteResource(String path, Long id) {
-        String pathWithRootDirectory = resolvePath(path, id);
+        String pathWithRootDirectory = PathUtils.resolvePath(path, id);
 
         if (PathUtils.isDirectory(path)) {
             minioRepository.removeDirectory(pathWithRootDirectory);
@@ -189,7 +192,7 @@ public class MinioStorageService {
     }
 
     public InputStreamResource downloadResource(String path, Long id) {
-        String pathWithRootDirectory = resolvePath(path, id);
+        String pathWithRootDirectory = PathUtils.resolvePath(path, id);
 
         if (PathUtils.isDirectory(path)) {
             return minioRepository.downloadDirectory(pathWithRootDirectory);
@@ -198,8 +201,5 @@ public class MinioStorageService {
         }
     }
 
-    private static String resolvePath(String path, Long id) {
-        PathUtils.checkPath(path);
-        return PathUtils.getPathWithUserRootDirectory(path, id);
-    }
+
 }

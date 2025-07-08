@@ -239,9 +239,6 @@ public class MinioRepository {
     }
 
     public void removeDirectory(String pathWithRootDirectory) {
-//        Iterable<Result<Item>> directoryInfo = getDirectoryInfo(pathWithRootDirectory);
-//        List<DeleteObject> objectsToDelete = new LinkedList<>();
-
         Iterable<Result<Item>> directoryInfo = getDirectoryInfoRecursive(pathWithRootDirectory);
 
         try {
