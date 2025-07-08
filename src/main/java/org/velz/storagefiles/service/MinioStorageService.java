@@ -184,6 +184,9 @@ public class MinioStorageService {
     public void deleteResource(String path, Long id) {
         String pathWithRootDirectory = PathUtils.resolvePath(path, id);
 
+        if (!minioRepository.resourceExists(pathWithRootDirectory)) {
+            throw new ResourceNotExistsException("Ресурс не существует");
+        }
         if (PathUtils.isDirectory(path)) {
             minioRepository.removeDirectory(pathWithRootDirectory);
         } else {
