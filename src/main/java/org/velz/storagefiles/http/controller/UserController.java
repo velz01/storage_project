@@ -39,10 +39,6 @@ public class UserController {
     public UserReadDto register(@RequestBody @Validated UserCreateEditDto dto, /*BindingResult bindingResult,*/
                                  HttpSession session) {
 
-//        if (bindingResult.hasErrors()) {
-//            ResponseEntity.status(400);
-//            throw new RuntimeException();
-//        }
         UserReadDto userReadDto = userService.create(dto);
         User user = userService.loadUserByUsername(userReadDto.getUsername());
 
@@ -62,11 +58,6 @@ public class UserController {
         return new UserReadDto(dto.getUsername());
     }
 
-//    @GetMapping("/user/me")
-////    public UserReadDto checkCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-////
-////        return new UserReadDto(userDetails.getUsername());
-////    }
     @GetMapping("/user/me")
     public UserReadDto checkCurrentUser(@AuthenticationPrincipal User user) {
 
@@ -93,9 +84,4 @@ public class UserController {
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
     }
 
-    @GetMapping("/test")
-    public String test() {
-        throw new RuntimeException("asdasd");
-//        return "rabotaet";
-    }
 }

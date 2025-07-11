@@ -22,8 +22,6 @@ public class PathUtils {
 
         String pathWithUserRootDirectory = PathUtils.getPathWithUserRootDirectory(path, id);
 
-//        String pathWithoutSlashes = pathWithUserRootDirectory.trim().replaceAll(SLASHES_TO_DELETE, "");
-
         String[] parts = pathWithUserRootDirectory.split(SLASHES_TO_SPLIT);
 
 
@@ -65,10 +63,6 @@ public class PathUtils {
 
     public String getPathToFile(String pathWithRootDirectory, MultipartFile file) {
         return pathWithRootDirectory.concat(Objects.requireNonNull(file.getOriginalFilename()));
-    }
-
-    public void checkPath(String path) {
-        Paths.get(path);
     }
 
     public String getUserRootDirectory(Long id) {

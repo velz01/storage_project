@@ -79,14 +79,11 @@ public class MinioRepository {
 
     public void renameDirectory(String oldPath, String newPath) {
 
-
         try {
             Iterable<Result<Item>> directoryInfoRecursive = getDirectoryInfoRecursive(oldPath);
             for (Result<Item> resourceInfo : directoryInfoRecursive) {
 
                 String resourcePath = resourceInfo.get().objectName();
-
-
 
                 if (resourcePath.equals(oldPath)) {
                     renameFile(resourcePath, newPath);

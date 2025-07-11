@@ -39,10 +39,7 @@ public class ResourceController {
     @GetMapping("/resource")
     public ResourceDto getFileInfo(@RequestParam String path, @AuthenticationPrincipal User user) {
 
-        ResourceDto resource = minioStorageService.getFileInfo(path, user.getId());
-        System.out.println(resource);
-
-        return resource;
+        return minioStorageService.getFileInfo(path, user.getId());
     }
 
     @PostMapping("/resource")
