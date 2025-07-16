@@ -1,11 +1,12 @@
 package org.velz.storagefiles.dto;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
-import org.velz.storagefiles.enums.ResourceType;
+import lombok.Getter;
 
-@Value
+@AllArgsConstructor
+@Getter
 @Builder
 public class ResourceDto {
     String path;

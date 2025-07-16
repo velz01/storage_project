@@ -1,4 +1,4 @@
-package org.velz.storagefiles.http.controller;
+package org.velz.storagefiles.controller;
 
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,8 @@ public class ResourceController {
     }
 
 
-    @GetMapping("/resource/move")
+    @PostMapping("/resource/move")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResourceDto renameResource(@RequestParam("from") String oldPath,
                                       @RequestParam("to") String newPath,
                                       @AuthenticationPrincipal User user) {
@@ -61,16 +62,5 @@ public class ResourceController {
 
     }
 
-    @PostMapping("/directory")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResourceDto createDirectory(@RequestParam String path, @AuthenticationPrincipal User user) {
-        return minioStorageService.createEmptyDirectory(path, user.getId());
-    }
 
-    @GetMapping("/directory")
-    public List<ResourceDto> getDirectoryInfo(@RequestParam String path, @AuthenticationPrincipal User user) {
-
-
-        return minioStorageService.getDirectoryInfo(path, user.getId());
-    }
 }

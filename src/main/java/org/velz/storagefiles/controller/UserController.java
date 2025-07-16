@@ -1,4 +1,4 @@
-package org.velz.storagefiles.http.controller;
+package org.velz.storagefiles.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,7 +36,7 @@ public class UserController {
 
     @PostMapping("/auth/sign-up")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public UserReadDto register(@RequestBody @Validated UserCreateEditDto dto, /*BindingResult bindingResult,*/
+    public UserReadDto register(@RequestBody @Validated UserCreateEditDto dto,
                                  HttpSession session) {
 
         UserReadDto userReadDto = userService.create(dto);

@@ -1,4 +1,4 @@
-package org.velz.storagefiles.http.handler;
+package org.velz.storagefiles.handler;
 
 
 import org.springframework.http.HttpStatus;

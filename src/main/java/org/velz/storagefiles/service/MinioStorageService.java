@@ -72,10 +72,6 @@ public class MinioStorageService {
     }
 
     public ResourceDto renameResource(String oldPath, String newPath, Long id) {
-        if (newPath.isBlank()) {
-            throw new InvalidPathException("Невалидный путь", "Путь пустой");
-        }
-
 
         String oldPathWithRootDirectory = PathUtils.resolvePath(oldPath, id);
         String newPathWithRootDirectory = PathUtils.resolvePath(newPath, id);

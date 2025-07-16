@@ -64,7 +64,6 @@ public class PathUtils {
     public String getPathToFile(String pathWithRootDirectory, MultipartFile file) {
         return pathWithRootDirectory.concat(Objects.requireNonNull(file.getOriginalFilename()));
     }
-
     public String getUserRootDirectory(Long id) {
         return PathUtils.getPathWithUserRootDirectory("", id);
     }

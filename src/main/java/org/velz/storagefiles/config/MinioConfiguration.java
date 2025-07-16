@@ -11,7 +11,7 @@ import org.velz.storagefiles.properties.MinioProperties;
 @Configuration
 @RequiredArgsConstructor
 @EnableRedisHttpSession
-public class ApplicationConfiguration {
+public class MinioConfiguration {
     private final MinioProperties minioProperties;
 
     @Bean

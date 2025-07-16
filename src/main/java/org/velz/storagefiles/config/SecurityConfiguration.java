@@ -29,8 +29,7 @@ public class SecurityConfiguration {
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                                 .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/api/**").authenticated()
-                                .requestMatchers("/api/user/me").authenticated() //
-                                .requestMatchers("/**").permitAll()
+                                .requestMatchers("/api/**").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
