@@ -20,9 +20,9 @@ public class ResourceExceptionHandler {
     }
 
     @ExceptionHandler(StorageException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleStorageException() {
-        return Map.of("message", "ресурс не найден");
+        return Map.of("message", "неизвестная ошибка");
     }
 
     @ExceptionHandler(InvalidFileException.class)

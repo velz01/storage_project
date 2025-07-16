@@ -117,6 +117,9 @@ public class MinioRepository {
 
     public InputStreamResource downloadDirectory(String path) {
         Iterable<Result<Item>> resources = getDirectoryInfoRecursive(path);
+        if (!resourceExists(path)) {
+            throw new ResourceNotExistsException(path);
+        }
         try (
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ZipOutputStream zip = new ZipOutputStream(baos);
@@ -132,16 +135,7 @@ public class MinioRepository {
                     continue;
                 }
 
-                try (InputStream is = downloadFile(resourcePath).getInputStream();) {
-                    zip.putNextEntry(new ZipEntry(resourceName));
-                    int len;
-
-                    while ((len = is.read(buffer)) > 0) {
-                        zip.write(buffer, 0, len);
-                    }
-
-                    zip.closeEntry();
-                }
+                addEntryToZip(resourcePath, zip, resourceName, buffer);
 
 
             }
@@ -152,6 +146,19 @@ public class MinioRepository {
             return new InputStreamResource(zipIs);
         } catch (Exception e) {
             throw new StorageException(e.getMessage());
+        }
+    }
+
+    private void addEntryToZip(String resourcePath, ZipOutputStream zip, String resourceName, byte[] buffer) throws IOException {
+        try (InputStream is = downloadFile(resourcePath).getInputStream();) {
+            zip.putNextEntry(new ZipEntry(resourceName));
+            int len;
+
+            while ((len = is.read(buffer)) > 0) {
+                zip.write(buffer, 0, len);
+            }
+
+            zip.closeEntry();
         }
     }
 
@@ -180,7 +187,7 @@ public class MinioRepository {
                             .object(path)
                             .build());
         } catch (Exception e) {
-            throw new ResourceNotExistsException("Ресурса не существует");
+            throw new StorageException(e.getMessage());
         }
 
     }
@@ -248,7 +255,7 @@ public class MinioRepository {
                                 .build());
             }
         } catch (Exception e) {
-            throw new ResourceNotExistsException("Папка не существует");
+            throw new StorageException(e.getMessage());
         }
 
 

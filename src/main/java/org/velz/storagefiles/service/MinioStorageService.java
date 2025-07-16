@@ -11,6 +11,7 @@ import org.velz.storagefiles.dto.ResourceDto;
 import org.velz.storagefiles.exception.ResourceNotExistsException;
 import org.velz.storagefiles.exception.ParentFolderNotExistsException;
 import org.velz.storagefiles.exception.ResourceAlreadyExistsException;
+import org.velz.storagefiles.exception.StorageException;
 import org.velz.storagefiles.mapper.ResourceMapper;
 import org.velz.storagefiles.repository.MinioRepository;
 import org.velz.storagefiles.utils.PathUtils;
@@ -67,22 +68,18 @@ public class MinioStorageService {
             }
         } catch (
                 Exception e) {
-            throw new ResourceNotExistsException("Ресурса не существует");
+            throw new StorageException("ошибка при работе с minio");
         }
     }
 
     public ResourceDto renameResource(String oldPath, String newPath, Long id) {
-        if (newPath.isBlank()) {
-            throw new InvalidPathException("Невалидный путь", "Путь пустой");
-        }
-
+        PathUtils.ensurePathsNotDifferent(oldPath, newPath);
 
         String oldPathWithRootDirectory = PathUtils.resolvePath(oldPath, id);
         String newPathWithRootDirectory = PathUtils.resolvePath(newPath, id);
 
-        if (minioRepository.resourceExists(newPathWithRootDirectory)) {
-            throw new ResourceAlreadyExistsException("Ресурс уже существует");
-        }
+        ensureResourceExists(oldPathWithRootDirectory);
+        ensureResourceNotExists(newPathWithRootDirectory);
 
         if (PathUtils.isDirectory(oldPath)) {
             minioRepository.renameDirectory(oldPathWithRootDirectory, newPathWithRootDirectory);
@@ -96,10 +93,12 @@ public class MinioStorageService {
 
     }
 
+
     public List<ResourceDto> getDirectoryInfo(String path, Long id) {
         String pathWithRootDirectory = PathUtils.resolvePath(path, id);
         List<ResourceDto> fileList = new ArrayList<>();
 
+        ensureResourceExists(pathWithRootDirectory);
 
         Iterable<Result<Item>> directoryInfo = minioRepository.getDirectoryInfo(pathWithRootDirectory);
 
@@ -113,7 +112,7 @@ public class MinioStorageService {
                 fileList.add(resourceDto);
             }
         } catch (Exception e) {
-            throw new ResourceNotExistsException("Папка не существует");
+            throw new StorageException("ошибка при работе с minio");
         }
         return fileList;
     }
@@ -126,7 +125,7 @@ public class MinioStorageService {
         for (MultipartFile file : files) {
             String pathWithFileName = PathUtils.getPathToFile(pathWithRootDirectory, file);
 
-            checkResourceExistence(pathWithFileName);
+            ensureResourceNotExists(pathWithFileName);
             String[] pathSegments = pathWithFileName.split("/");
             StringBuilder prefix = new StringBuilder();
 
@@ -159,7 +158,7 @@ public class MinioStorageService {
             throw new ParentFolderNotExistsException("Родительская папка не существует");
         }
 
-        checkResourceExistence(pathWithRootDirectory);
+        ensureResourceNotExists(pathWithRootDirectory);
 
         ObjectWriteResponse directoryInfo = minioRepository.createEmptyDirectory(pathWithRootDirectory);
 
@@ -169,24 +168,17 @@ public class MinioStorageService {
     public ResourceDto getFileInfo(String path, Long id) {
 
         String pathWithRootDirectory = PathUtils.resolvePath(path, id);
+        ensureResourceExists(pathWithRootDirectory);
         StatObjectResponse statObjectResponse = minioRepository.getFileInfo(pathWithRootDirectory);
 
         return resourceMapper.mapToResource(statObjectResponse);
-    }
-
-    private void checkResourceExistence(String pathWithRootDirectory) {
-        if (minioRepository.resourceExists(pathWithRootDirectory)) {
-            throw new ResourceAlreadyExistsException("Ресурс уже существует");
-        }
     }
 
 
     public void deleteResource(String path, Long id) {
         String pathWithRootDirectory = PathUtils.resolvePath(path, id);
 
-        if (!minioRepository.resourceExists(pathWithRootDirectory)) {
-            throw new ResourceNotExistsException("Ресурс не существует");
-        }
+        ensureResourceExists(pathWithRootDirectory);
         if (PathUtils.isDirectory(path)) {
             minioRepository.removeDirectory(pathWithRootDirectory);
         } else {
@@ -194,9 +186,10 @@ public class MinioStorageService {
         }
     }
 
+
     public InputStreamResource downloadResource(String path, Long id) {
         String pathWithRootDirectory = PathUtils.resolvePath(path, id);
-
+        ensureResourceExists(pathWithRootDirectory);
         if (PathUtils.isDirectory(path)) {
             return minioRepository.downloadDirectory(pathWithRootDirectory);
         } else {
@@ -204,5 +197,16 @@ public class MinioStorageService {
         }
     }
 
+    private void ensureResourceNotExists(String pathWithRootDirectory) {
+        if (minioRepository.resourceExists(pathWithRootDirectory)) {
+            throw new ResourceAlreadyExistsException("Ресурс уже существует");
+        }
+    }
+
+    private void ensureResourceExists(String pathWithRootDirectory) {
+        if (!minioRepository.resourceExists(pathWithRootDirectory)) {
+            throw new ResourceNotExistsException("Ресурс не существует");
+        }
+    }
 
 }

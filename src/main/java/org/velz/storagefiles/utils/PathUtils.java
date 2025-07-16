@@ -1,8 +1,12 @@
 package org.velz.storagefiles.utils;
 
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import org.velz.storagefiles.exception.ResourceAlreadyExistsException;
+import org.velz.storagefiles.repository.MinioRepository;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
@@ -12,7 +16,9 @@ import java.util.regex.Pattern;
 
 
 @UtilityClass
+@RequiredArgsConstructor
 public class PathUtils {
+
     private static final Pattern PATH_PART_PATTERN = Pattern.compile("^(?! |.* $)[^/\\\\:*?\"<>|]+$");
 
     private static final String SLASH = "/";
@@ -95,4 +101,14 @@ public class PathUtils {
         return pathWithoutLastSegment;
 
     }
+
+    public static void ensurePathsNotDifferent(String oldPath, String newPath) {
+        boolean oldIsDir = PathUtils.isDirectory(oldPath);
+        boolean newIsDir = PathUtils.isDirectory(newPath);
+        if (oldIsDir != newIsDir) {
+            throw new InvalidPathException("Невалидные пути",
+                    "Оба пути должны быть либо файлами либо директориями");
+        }
+    }
+
 }

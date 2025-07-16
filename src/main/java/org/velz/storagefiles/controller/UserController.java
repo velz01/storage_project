@@ -70,6 +70,10 @@ public class UserController {
                        HttpServletResponse response,
                        Authentication authentication) {
 
+        if (authentication == null) {
+            throw new UserNotAuthorizedException("User not authorized");
+        }
+
         new SecurityContextLogoutHandler().logout(request, response, authentication);
 
 
@@ -77,8 +81,7 @@ public class UserController {
 
 
     public void authenticateUser(UserCreateEditDto dto, HttpSession session) {
-        UserDetails userDetails = userService.loadUserByUsername(dto.getUsername());
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, dto.getPassword());
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword());
         Authentication auth = authenticationManager.authenticate(authToken);
         SecurityContextHolder.getContext().setAuthentication(auth);
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());

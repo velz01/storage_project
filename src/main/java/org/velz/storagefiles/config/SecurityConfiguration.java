@@ -30,7 +30,7 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/api/**").authenticated()
                                 .requestMatchers("/api/**").authenticated()
-                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .csrf(AbstractHttpConfigurer::disable)
