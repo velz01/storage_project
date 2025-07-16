@@ -1,4 +1,4 @@
-package org.velz.storagefiles.http.controller;
+package org.velz.storagefiles.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

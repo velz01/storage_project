@@ -1,10 +1,13 @@
 package org.velz.storagefiles.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.Value;
 import org.velz.storagefiles.entity.Role;
 
-@Value
+@Getter
+@AllArgsConstructor
 public class UserReadDto {
-    String username;
+    private String username;
 
 }

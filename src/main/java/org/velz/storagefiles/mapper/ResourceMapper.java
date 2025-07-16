@@ -5,7 +5,7 @@ import io.minio.StatObjectResponse;
 import io.minio.messages.Item;
 import org.springframework.stereotype.Component;
 import org.velz.storagefiles.dto.ResourceDto;
-import org.velz.storagefiles.enums.ResourceType;
+import org.velz.storagefiles.dto.ResourceType;
 import org.velz.storagefiles.utils.PathUtils;
 
 @Component

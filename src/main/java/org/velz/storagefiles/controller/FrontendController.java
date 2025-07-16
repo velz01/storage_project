@@ -1,4 +1,4 @@
-package org.velz.storagefiles.http.controller;
+package org.velz.storagefiles.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
