@@ -11,7 +11,7 @@ import org.velz.storagefiles.service.MinioStorageService;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class DirectoryController {
