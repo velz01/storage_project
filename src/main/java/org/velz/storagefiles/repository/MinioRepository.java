@@ -6,6 +6,7 @@ import io.minio.messages.Item;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ import java.util.zip.ZipOutputStream;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class MinioRepository {
 
     public static final int BUFFER_SIZE = 8192;
@@ -56,9 +58,6 @@ public class MinioRepository {
 
     public void renameFile(String oldPath, String newPath) {
 
-        if (resourceExists(newPath)) {
-            throw new ResourceAlreadyExistsException("Ресурс уже существует");
-        }
         try {
             minioClient.copyObject(
                     CopyObjectArgs.builder()
@@ -73,7 +72,9 @@ public class MinioRepository {
 
             removeFile(oldPath);
         } catch (Exception e) {
-            throw new ResourceAlreadyExistsException(e.getMessage());
+            log.warn("minio exception with paths {}, {}", oldPath, newPath);
+            throw new StorageException(e.getMessage());
+
         }
     }
 
@@ -95,6 +96,8 @@ public class MinioRepository {
                 renameFile(resourcePath, newPathToFile);
             }
         } catch (Exception e) {
+            log.warn("minio exception with paths {}, {}", oldPath, newPath);
+
             throw new StorageException(e.getMessage());
         }
 
@@ -110,6 +113,7 @@ public class MinioRepository {
                             .object(path)
                             .build()));
         } catch (Exception e) {
+            log.warn("minio exception during download file {}, {}", path, e.getMessage());
             throw new StorageException(e.getMessage());
         }
 
@@ -145,6 +149,7 @@ public class MinioRepository {
 
             return new InputStreamResource(zipIs);
         } catch (Exception e) {
+            log.warn("minio exception during downloading directory {}, {}", path, e.getMessage());
             throw new StorageException(e.getMessage());
         }
     }
@@ -175,6 +180,7 @@ public class MinioRepository {
         } catch (IOException e) {
             throw new InvalidFileException(e.getMessage());
         } catch (Exception e) {
+            log.warn("minio exception during creating empty directory {}, {}", path, e.getMessage());
             throw new StorageException(e.getMessage());
         }
     }

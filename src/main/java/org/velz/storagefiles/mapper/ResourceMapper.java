@@ -10,51 +10,37 @@ import org.velz.storagefiles.utils.PathUtils;
 
 @Component
 public class ResourceMapper {
-    public ResourceDto mapToResource(StatObjectResponse statObjectResponse) {
 
-        return ResourceDto.builder()
-                .path(PathUtils.getRelativePath(statObjectResponse.object()))
-                .name(PathUtils.getFileNameOrDirectoryName(statObjectResponse.object()))
-                .size(statObjectResponse.size())
-                .type(ResourceType.FILE)
-                .build();
+    public ResourceDto mapFile(StatObjectResponse stat) {
+        return map(stat.object(), stat.size(), ResourceType.FILE);
     }
 
-    public ResourceDto mapToResource(ObjectWriteResponse objectWriteResponse, long size) {
+    public ResourceDto mapFile(ObjectWriteResponse writeResp, long size) {
+        return map(writeResp.object(), size, ResourceType.FILE);
+    }
+
+    public ResourceDto mapItem(Item item) {
+        ResourceType type = item.isDir() ? ResourceType.DIRECTORY : ResourceType.FILE;
+        return map(item.objectName(), item.size(), type);
+    }
+
+    public ResourceDto mapDirectory(ObjectWriteResponse writeResp) {
+        return map(writeResp.object(), null, ResourceType.DIRECTORY);
+    }
+
+    public ResourceDto mapDirectory(String rawPath) {
+        return map(rawPath, null, ResourceType.DIRECTORY);
+    }
+
+    private ResourceDto map(String fullObjectName, Long size, ResourceType type) {
+        String relative = PathUtils.getRelativePath(fullObjectName);
+        String name = PathUtils.getFileNameOrDirectoryName(fullObjectName);
+
         return ResourceDto.builder()
-                .path(PathUtils.getRelativePath(objectWriteResponse.object()))
-                .name(PathUtils.getFileNameOrDirectoryName(objectWriteResponse.object()))
+                .path(relative)
+                .name(name)
                 .size(size)
-                .type(ResourceType.FILE)
-                .build();
-    }
-
-    public ResourceDto mapToResource(Item resourceInfo) {
-       return ResourceDto.builder()
-                .path(PathUtils.getRelativePath(resourceInfo.objectName()))
-                .name(PathUtils.getFileNameOrDirectoryName(resourceInfo.objectName()))
-                .size(resourceInfo.size())
-                .type(resourceInfo.isDir() ? ResourceType.DIRECTORY : ResourceType.FILE)
-                .build();
-
-    }
-
-
-    public ResourceDto mapToResource(ObjectWriteResponse objectWriteResponse) {
-        return ResourceDto.builder()
-                .path(PathUtils.getRelativePath(objectWriteResponse.object()))
-                .name(PathUtils.getFileNameOrDirectoryName(objectWriteResponse.object()))
-                .size(null)
-                .type(ResourceType.DIRECTORY)
-                .build();
-    }
-
-    public ResourceDto mapToResource(String newPath) {
-        return ResourceDto.builder()
-                .path(PathUtils.getRelativePath(newPath))
-                .name(PathUtils.getFileNameOrDirectoryName(newPath))
-                .size(null)
-                .type(ResourceType.DIRECTORY)
+                .type(type)
                 .build();
     }
 }
