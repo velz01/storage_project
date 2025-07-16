@@ -1,0 +1,17 @@
+spring:
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+minio:
+  bucket: ${MINIO_BUCKET}
+  url: ${MINIO_ENDPOINT}
+  accessKey: ${MINIO_ACCESS_KEY}
+  secretKey: ${MINIO_SECRET_KEY}

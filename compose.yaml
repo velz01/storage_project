@@ -1,6 +1,31 @@
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
 
+    container_name: app
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: ${DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+
+      MINIO_URL: ${MINIO_ENDPOINT}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    ports:
+        - "8080:8080"
+    networks:
+      - application-network
+    depends_on:
+      - postgres
+      - redis
+      - minio
   postgres:
     image: postgres:17.2
     container_name: postgres
@@ -13,7 +38,8 @@ services:
       - "5442:5432"
     volumes:
       - postgres-data:/data
-
+    networks:
+      - application-network
   minio:
     image: minio/minio:latest
     restart: always
@@ -27,7 +53,8 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
-
+    networks:
+      - application-network
   redis:
     image: redis:latest
     container_name: redis
@@ -36,7 +63,12 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    networks:
+      - application-network
 
+networks:
+  application-network:
+    driver: bridge
 
 volumes:
   minio_data:
