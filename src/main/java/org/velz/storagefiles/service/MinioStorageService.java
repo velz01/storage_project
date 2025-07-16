@@ -41,36 +41,25 @@ public class MinioStorageService {
         List<ResourceDto> resourceDtoList = new ArrayList<>();
 
         String userRootDirectory = PathUtils.getUserRootDirectory(id);
-        Iterable<Result<Item>> filesInfo = minioRepository.getDirectoryInfoRecursive(userRootDirectory);
+        minioRepository.getDirectoryInfoRecursive(userRootDirectory).forEach(resource -> {
+            try {
+
+                Item resourceInfo = resource.get();
+                String resourceName = PathUtils.getFileNameOrDirectoryName(resourceInfo.objectName());
+                if (!resourceName.equals(userRootDirectory) && resourceName.contains(partOfResourceName)) {
+                    resourceDtoList.add(resourceMapper.mapToResource(resourceInfo));
+                }
 
 
-        addFoundResourcesToList(filesInfo, resourceDtoList, userRootDirectory, partOfResourceName);
+            } catch (Exception e) {
+                throw new StorageException(e.getMessage());
+            }
+        });
 
 
         return resourceDtoList;
     }
 
-    private void addFoundResourcesToList(Iterable<Result<Item>> resourcesInfo,
-                                         List<ResourceDto> resourceDtoList,
-                                         String userRootDirectory,
-                                         String partOfResourceName) {
-        try {
-            for (Result<Item> resource : resourcesInfo) {
-
-                Item resourceInfo = resource.get();
-                String resourceName = PathUtils.getFileNameOrDirectoryName(resourceInfo.objectName());
-                if (resourceName.equals(userRootDirectory)) {
-                    continue;
-                }
-                if (resourceName.contains(partOfResourceName)) {
-                    resourceDtoList.add(resourceMapper.mapToResource(resourceInfo));
-                }
-            }
-        } catch (
-                Exception e) {
-            throw new StorageException("ошибка при работе с minio");
-        }
-    }
 
     public ResourceDto renameResource(String oldPath, String newPath, Long id) {
         PathUtils.ensurePathsNotDifferent(oldPath, newPath);
@@ -105,11 +94,10 @@ public class MinioStorageService {
         try {
             for (Result<Item> directory : directoryInfo) {
                 Item item = directory.get();
-                if (item.objectName().equals(pathWithRootDirectory)) {
-                    continue;
+                if (!item.objectName().equals(pathWithRootDirectory)) {
+                    fileList.add(resourceMapper.mapToResource(item));
                 }
-                ResourceDto resourceDto = resourceMapper.mapToResource(item);
-                fileList.add(resourceDto);
+
             }
         } catch (Exception e) {
             throw new StorageException("ошибка при работе с minio");
@@ -126,17 +114,8 @@ public class MinioStorageService {
             String pathWithFileName = PathUtils.getPathToFile(pathWithRootDirectory, file);
 
             ensureResourceNotExists(pathWithFileName);
-            String[] pathSegments = pathWithFileName.split("/");
-            StringBuilder prefix = new StringBuilder();
 
-            for (int i = 1; i < pathSegments.length - 1; i++) {
-                prefix.append(pathSegments[i]).append("/");
-
-                if (!minioRepository.resourceExists(PathUtils.getPathWithUserRootDirectory(prefix.toString(), id))) {
-                    ResourceDto createdDirectory = createEmptyDirectory(prefix.toString(), id);
-                    fileList.add(createdDirectory);
-                }
-            }
+            addMissingDirectories(id, pathWithFileName, fileList);
             ObjectWriteResponse objectWriteResponse = minioRepository.uploadObject(file, pathWithFileName);
             ResourceDto resourceDto = resourceMapper.mapToResource(objectWriteResponse, file.getSize());
 
@@ -146,8 +125,24 @@ public class MinioStorageService {
 
     }
 
+    private void addMissingDirectories(Long id, String pathWithFileName, List<ResourceDto> fileList) {
+        String[] pathSegments = pathWithFileName.split("/");
+        StringBuilder prefix = new StringBuilder();
+
+        for (int i = 1; i < pathSegments.length - 1; i++) {
+            prefix.append(pathSegments[i]).append("/");
+
+            String pathWithUserRootDirectory = PathUtils.getPathWithUserRootDirectory(prefix.toString(), id);
+            if (!minioRepository.resourceExists(pathWithUserRootDirectory)) {
+                ResourceDto createdDirectory = createEmptyDirectory(prefix.toString(), id);
+                fileList.add(createdDirectory);
+            }
+        }
+    }
+
 
     public ResourceDto createEmptyDirectory(String path, Long id) {
+
         if (!PathUtils.isDirectory(path)) {
             throw new InvalidPathException("Невалидный путь", "Ресурс не является папкой");
         }
@@ -190,11 +185,11 @@ public class MinioStorageService {
     public InputStreamResource downloadResource(String path, Long id) {
         String pathWithRootDirectory = PathUtils.resolvePath(path, id);
         ensureResourceExists(pathWithRootDirectory);
-        if (PathUtils.isDirectory(path)) {
-            return minioRepository.downloadDirectory(pathWithRootDirectory);
-        } else {
-            return minioRepository.downloadFile(pathWithRootDirectory);
-        }
+
+        return PathUtils.isDirectory(path)
+                ? minioRepository.downloadDirectory(pathWithRootDirectory)
+                : minioRepository.downloadFile(pathWithRootDirectory);
+
     }
 
     private void ensureResourceNotExists(String pathWithRootDirectory) {

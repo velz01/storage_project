@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 
 
 @UtilityClass
-@RequiredArgsConstructor
 public class PathUtils {
 
     private static final Pattern PATH_PART_PATTERN = Pattern.compile("^(?! |.* $)[^/\\\\:*?\"<>|]+$");
